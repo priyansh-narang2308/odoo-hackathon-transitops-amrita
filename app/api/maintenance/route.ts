@@ -98,10 +98,13 @@ export async function POST(req: Request) {
           }
         }
       } else {
-        await tx.vehicle.update({
-          where: { id: vehicleId },
-          data: { status: VehicleStatus.InShop },
-        });
+        // Business Rule: Opening maintenance sets vehicle to InShop, unless it's Retired
+        if (vehicle.status !== VehicleStatus.Retired) {
+          await tx.vehicle.update({
+            where: { id: vehicleId },
+            data: { status: VehicleStatus.InShop },
+          });
+        }
       }
 
       await tx.systemLog.create({
@@ -163,6 +166,16 @@ export async function PATCH(req: Request) {
     }
 
     if (action === "COMPLETE") {
+      if (user.role !== "FLEET_MANAGER" && user.role !== "ADMIN") {
+        return NextResponse.json(
+          {
+            error:
+              "RBAC Restricted: Only Fleet Managers and Admins can approve and close maintenance.",
+          },
+          { status: 403 },
+        );
+      }
+
       const updatedLog = await db.$transaction(async (tx) => {
         const log = await tx.maintenanceLog.update({
           where: { id },
