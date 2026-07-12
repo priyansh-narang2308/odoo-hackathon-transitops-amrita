@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { DashboardClient } from "@/components/dashboard-client";
+import { DashboardClient } from "@/components/dashboard/dashboard-client";
 
 export default async function DashboardPage() {
   const user = await getSession();
@@ -10,17 +10,21 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const [dbTrips, dbVehicles, dbDrivers] = await Promise.all([
-    db.trip.findMany({
-      include: {
-        vehicle: true,
-        driver: true,
-      },
-      orderBy: { createdAt: "desc" },
-    }),
-    db.vehicle.findMany(),
-    db.driver.findMany(),
-  ]);
+  const [dbTrips, dbVehicles, dbDrivers, dbFuel, dbExpenses, dbMaintenance] =
+    await Promise.all([
+      db.trip.findMany({
+        include: {
+          vehicle: true,
+          driver: true,
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+      db.vehicle.findMany(),
+      db.driver.findMany(),
+      db.fuelLog.findMany(),
+      db.expense.findMany(),
+      db.maintenanceLog.findMany(),
+    ]);
 
   const formattedTrips = dbTrips.map((t) => {
     let statusBg = "bg-blue-50 dark:bg-blue-500/20";
@@ -79,24 +83,44 @@ export default async function DashboardPage() {
   });
 
   const activeVehiclesCount = dbVehicles.filter(
-    (v) => v.status === "Available" || v.status === "OnTrip"
+    (v) => v.status === "Available" || v.status === "OnTrip",
   ).length;
-  const availableVehiclesCount = dbVehicles.filter((v) => v.status === "Available").length;
-  const inMaintenanceCount = dbVehicles.filter((v) => v.status === "InShop").length;
+  const availableVehiclesCount = dbVehicles.filter(
+    (v) => v.status === "Available",
+  ).length;
+  const inMaintenanceCount = dbVehicles.filter(
+    (v) => v.status === "InShop",
+  ).length;
   const retiredCount = dbVehicles.filter((v) => v.status === "Retired").length;
   const totalVehiclesCount = dbVehicles.length || 1;
 
   const activeTripsCount = dbTrips.filter(
-    (t) => t.status === "Dispatched"
+    (t) => t.status === "Dispatched",
   ).length;
   const pendingTripsCount = dbTrips.filter((t) => t.status === "Draft").length;
   const driversOnDutyCount = dbDrivers.filter(
-    (d) => d.status === "Available" || d.status === "OnTrip"
+    (d) => d.status === "Available" || d.status === "OnTrip",
   ).length;
   const utilizationPercentage = Math.min(
     100,
-    Math.round(((totalVehiclesCount - availableVehiclesCount) / totalVehiclesCount) * 100)
+    Math.round(
+      ((totalVehiclesCount - availableVehiclesCount) / totalVehiclesCount) *
+        100,
+    ),
   );
+
+  const totalRevenue = dbTrips.reduce((acc, t) => acc + (t.revenue || 0), 0);
+  const totalFuelCost = dbFuel.reduce((acc, f) => acc + (f.cost || 0), 0);
+  const totalExpenseCost = dbExpenses.reduce(
+    (acc, e) => acc + (e.amount || 0),
+    0,
+  );
+  const totalMaintenanceCost = dbMaintenance.reduce(
+    (acc, m) => acc + (m.cost || 0),
+    0,
+  );
+  const totalOperationalCost =
+    totalFuelCost + totalExpenseCost + totalMaintenanceCost;
 
   const initialStats = {
     activeVehicles: activeVehiclesCount,
@@ -108,7 +132,15 @@ export default async function DashboardPage() {
     pendingTrips: pendingTripsCount,
     driversOnDuty: driversOnDutyCount,
     utilization: `${utilizationPercentage}%`,
+    totalRevenue,
+    totalOperationalCost,
   };
 
-  return <DashboardClient user={user} initialTrips={formattedTrips} initialStats={initialStats} />;
+  return (
+    <DashboardClient
+      user={user}
+      initialTrips={formattedTrips}
+      initialStats={initialStats}
+    />
+  );
 }
