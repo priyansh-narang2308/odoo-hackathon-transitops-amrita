@@ -302,40 +302,6 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        <div className="mt-8 pt-8 border-t border-slate-200 dark:border-gray-800/80 text-sm text-center sm:text-left text-slate-500 dark:text-slate-400 transition-colors">
-          Access is scoped by role:
-          <ul className="mt-3 space-y-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
-            <li className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#714B67]" />
-              <strong className="text-slate-700 dark:text-slate-200">
-                Fleet Manager
-              </strong>{" "}
-              → Fleet Asset Management & Lifecycle
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#4CA5FF]" />
-              <strong className="text-slate-700 dark:text-slate-200">
-                Dispatcher
-              </strong>{" "}
-              → Dashboard, Driver & Trip Operations
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#6AD1C1]" />
-              <strong className="text-slate-700 dark:text-slate-200">
-                Safety Officer
-              </strong>{" "}
-              → Driver Compliance & Safety Audits
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#FDB833]" />
-              <strong className="text-slate-700 dark:text-slate-200">
-                Financial Analyst
-              </strong>{" "}
-              → Fuel & Expenses, Analytics & ROI
-            </li>
-          </ul>
-        </div>
-
         <div className="mt-8 text-center">
           <p className="text-sm text-slate-500 dark:text-slate-400">
             Already have an account?{" "}

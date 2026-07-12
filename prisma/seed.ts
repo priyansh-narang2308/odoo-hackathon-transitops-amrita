@@ -21,6 +21,14 @@ async function main() {
   await db.driver.deleteMany();
   await db.vehicle.deleteMany();
   await db.user.deleteMany();
+  const adminUser = await db.user.create({
+    data: {
+      name: "System Administrator",
+      email: "admin@transitops.com",
+      passwordHash: "password123_hashed",
+      role: RoleType.ADMIN,
+    },
+  });
 
   const fleetManager = await db.user.create({
     data: {

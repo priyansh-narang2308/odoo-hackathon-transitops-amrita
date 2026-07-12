@@ -87,7 +87,7 @@ export function AnalyticsClient({ initialData }: AnalyticsClientProps) {
       const doc = new jsPDF();
       doc.setFontSize(18);
       doc.text("TransitOps Analytics Report", 14, 22);
-
+      
       doc.setFontSize(11);
       doc.setTextColor(100);
       doc.text(`Generated on ${new Date().toLocaleDateString()}`, 14, 30);
@@ -98,28 +98,17 @@ export function AnalyticsClient({ initialData }: AnalyticsClientProps) {
         body: [
           ["Fuel Efficiency", initialData.fuelEfficiency],
           ["Fleet Utilization (%)", initialData.fleetUtilization.toString()],
-          [
-            "Total Operational Cost (INR)",
-            initialData.totalOperationalCost.toString(),
-          ],
-          [
-            "Total Maintenance Cost (INR)",
-            initialData.totalMaintenanceCost.toString(),
-          ],
+          ["Total Operational Cost (INR)", initialData.totalOperationalCost.toString()],
+          ["Total Maintenance Cost (INR)", initialData.totalMaintenanceCost.toString()],
           ["Average Vehicle ROI (%)", initialData.vehicleRoi],
           ["Tolls Cost (INR)", initialData.expenseBreakdown.tolls.toString()],
-          [
-            "Other Expenses (INR)",
-            initialData.expenseBreakdown.others.toString(),
-          ],
+          ["Other Expenses (INR)", initialData.expenseBreakdown.others.toString()],
         ],
         theme: "striped",
         headStyles: { fillColor: [113, 75, 103] },
       });
 
-      doc.save(
-        `analytics_report_${new Date().toISOString().split("T")[0]}.pdf`,
-      );
+      doc.save(`analytics_report_${new Date().toISOString().split("T")[0]}.pdf`);
       toast.success("Analytics report exported as PDF");
     } catch (error) {
       console.error(error);

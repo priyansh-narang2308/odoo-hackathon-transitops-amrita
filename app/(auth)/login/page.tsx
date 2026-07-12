@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import {
   Truck,
   AlertCircle,
@@ -166,23 +165,6 @@ export default function LoginPage() {
               </li>
             </ul>
           </div>
-
-          <div className="bg-white/80 dark:bg-[#121316]/90 p-3 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2 flex items-center justify-between">
-              <span>System Excalidraw Blueprint</span>
-              <span className="text-[#714B67] dark:text-purple-300">
-                RBAC Enabled
-              </span>
-            </div>
-            <Image
-              src="/login.png"
-              alt="TransitOps Excalidraw Architecture"
-              width={600}
-              height={260}
-              className="w-full max-h-[220px] object-cover rounded-xl border border-slate-200 dark:border-slate-800"
-              priority
-            />
-          </div>
         </div>
 
         <div className="mt-8 pt-6 border-t border-slate-300 dark:border-slate-800 text-xs font-bold text-slate-500 dark:text-slate-400 flex justify-between items-center">
@@ -207,7 +189,7 @@ export default function LoginPage() {
 
         <div className="mb-6 p-3 rounded-xl bg-slate-50 dark:bg-[#181A1F] border border-slate-200 dark:border-gray-800 transition-colors">
           <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 flex items-center justify-between">
-            <span>Quick Fill Hackathon Demo Roles:</span>
+            <span>Quick Fill Demo Roles:</span>
           </div>
           <div className="flex flex-wrap gap-2.5 text-xs">
             <button
@@ -228,12 +210,10 @@ export default function LoginPage() {
 
             <button
               type="button"
-              onClick={() =>
-                quickFill("dispatcher@transitops.com", "DISPATCHER")
-              }
+              onClick={() => quickFill("driver@transitops.com", "DRIVER")}
               className="px-4 py-2 cursor-pointer rounded-lg bg-[#4CA5FF]/10 border border-[#4CA5FF]/30 text-[#1975D2] font-semibold hover:bg-[#4CA5FF]/20 transition-all duration-200 whitespace-nowrap"
             >
-              Dispatcher
+              Driver
             </button>
 
             <button
@@ -319,12 +299,6 @@ export default function LoginPage() {
                   Fleet Manager (Assets, Maintenance & ROI)
                 </SelectItem>
                 <SelectItem
-                  value="DISPATCHER"
-                  className="py-2.5 font-medium cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-800 rounded-lg"
-                >
-                  Dispatcher / Driver Controller (Trips & Routing)
-                </SelectItem>
-                <SelectItem
                   value="DRIVER"
                   className="py-2.5 font-medium cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-800 rounded-lg"
                 >
@@ -376,40 +350,6 @@ export default function LoginPage() {
             {!loading && <ArrowRight className="w-5 h-5" />}
           </button>
         </form>
-
-        <div className="mt-8 pt-8 border-t border-slate-200 dark:border-gray-800/80 text-sm text-center sm:text-left text-slate-500 dark:text-slate-400 transition-colors">
-          Access is scoped by role:
-          <ul className="mt-3 space-y-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
-            <li className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#714B67]" />
-              <strong className="text-slate-700 dark:text-slate-200">
-                Fleet Manager
-              </strong>{" "}
-              → Fleet Asset Management & Lifecycle
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#4CA5FF]" />
-              <strong className="text-slate-700 dark:text-slate-200">
-                Dispatcher
-              </strong>{" "}
-              → Dashboard, Driver & Trip Operations
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#6AD1C1]" />
-              <strong className="text-slate-700 dark:text-slate-200">
-                Safety Officer
-              </strong>{" "}
-              → Driver Compliance & Safety Audits
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#FDB833]" />
-              <strong className="text-slate-700 dark:text-slate-200">
-                Financial Analyst
-              </strong>{" "}
-              → Fuel & Expenses, Analytics & ROI
-            </li>
-          </ul>
-        </div>
 
         <div className="mt-8 flex items-center justify-center gap-1.5 text-sm">
           <span className="text-slate-500 dark:text-slate-400">
