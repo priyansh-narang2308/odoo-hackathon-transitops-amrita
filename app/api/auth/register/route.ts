@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { CreateUserSchema } from "@/services/auth.service";
 import { RoleType } from "@prisma/client";
 import { z } from "zod";
+import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
   try {
@@ -20,14 +21,14 @@ export async function POST(req: Request) {
       );
     }
 
-    const fakePasswordHash = validatedData.password + "_hashed";
+    const hashedPassword = await bcrypt.hash(validatedData.password, 10);
     const roleToAssign = (validatedData.role || "DRIVER") as RoleType;
 
     const newUser = await db.user.create({
       data: {
         name: validatedData.name,
         email: validatedData.email,
-        passwordHash: fakePasswordHash,
+        passwordHash: hashedPassword,
         role: roleToAssign,
       },
     });
