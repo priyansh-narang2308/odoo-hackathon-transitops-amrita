@@ -58,9 +58,19 @@ export async function POST(req: Request) {
       status,
     } = body;
 
-    if (!source || !destination || !vehicleId || !driverId || cargoWeight === undefined || plannedDistance === undefined) {
+    if (
+      !source ||
+      !destination ||
+      !vehicleId ||
+      !driverId ||
+      cargoWeight === undefined ||
+      plannedDistance === undefined
+    ) {
       return NextResponse.json(
-        { error: "Source, destination, vehicle, driver, cargo weight, and planned distance are required." },
+        {
+          error:
+            "Source, destination, vehicle, driver, cargo weight, and planned distance are required.",
+        },
         { status: 400 },
       );
     }
@@ -70,7 +80,33 @@ export async function POST(req: Request) {
     });
 
     if (!vehicle) {
-      return NextResponse.json({ error: "Selected vehicle not found." }, { status: 404 });
+      return NextResponse.json(
+        { error: "Selected vehicle not found." },
+        { status: 404 },
+      );
+    }
+
+    // Business Rule: Retired or InShop vehicles must never appear in dispatch selection
+    if (
+      vehicle.status === VehicleStatus.Retired ||
+      vehicle.status === VehicleStatus.InShop
+    ) {
+      return NextResponse.json(
+        {
+          error: `Dispatch blocked: Vehicle ${vehicle.registrationNumber} is currently ${vehicle.status === VehicleStatus.InShop ? "In Shop" : "Retired"} and cannot be assigned to a trip.`,
+        },
+        { status: 400 },
+      );
+    }
+
+    // Business Rule: A vehicle already OnTrip cannot be assigned to another trip
+    if (vehicle.status === VehicleStatus.OnTrip) {
+      return NextResponse.json(
+        {
+          error: `Dispatch blocked: Vehicle ${vehicle.registrationNumber} is already on an active trip.`,
+        },
+        { status: 400 },
+      );
     }
 
     const driver = await db.driver.findUnique({
@@ -78,10 +114,44 @@ export async function POST(req: Request) {
     });
 
     if (!driver) {
-      return NextResponse.json({ error: "Selected driver not found." }, { status: 404 });
+      return NextResponse.json(
+        { error: "Selected driver not found." },
+        { status: 404 },
+      );
+    }
+
+    // Business Rule: Drivers with Suspended status cannot be assigned to trips
+    if (driver.status === DriverStatus.Suspended) {
+      return NextResponse.json(
+        {
+          error: `Dispatch blocked: Driver ${driver.name} is suspended and cannot be assigned to a trip.`,
+        },
+        { status: 400 },
+      );
+    }
+
+    // Business Rule: Drivers with expired licenses cannot be assigned to trips
+    if (new Date(driver.licenseExpiryDate) < new Date()) {
+      return NextResponse.json(
+        {
+          error: `Dispatch blocked: Driver ${driver.name}'s license expired on ${new Date(driver.licenseExpiryDate).toLocaleDateString()}. Renew before assigning.`,
+        },
+        { status: 400 },
+      );
+    }
+
+    // Business Rule: A driver already OnTrip cannot be assigned to another trip
+    if (driver.status === DriverStatus.OnTrip) {
+      return NextResponse.json(
+        {
+          error: `Dispatch blocked: Driver ${driver.name} is already on an active trip.`,
+        },
+        { status: 400 },
+      );
     }
 
     const weightNum = Number(cargoWeight);
+    // Business Rule: Cargo weight must not exceed vehicle's maximum load capacity
     if (weightNum > vehicle.maxLoadCapacity) {
       return NextResponse.json(
         {
@@ -91,13 +161,17 @@ export async function POST(req: Request) {
       );
     }
 
-    const tripStatus = status === "Dispatched" ? TripStatus.Dispatched : TripStatus.Draft;
-    const code = tripCode?.trim() || `TR-${Math.floor(100 + Math.random() * 900)}`;
+    const tripStatus =
+      status === "Dispatched" ? TripStatus.Dispatched : TripStatus.Draft;
+    const code =
+      tripCode?.trim() || `TR-${Math.floor(100 + Math.random() * 900)}`;
 
     const existingCode = await db.trip.findUnique({
       where: { tripCode: code },
     });
-    const finalCode = existingCode ? `${code}-${Math.floor(10 + Math.random() * 90)}` : code;
+    const finalCode = existingCode
+      ? `${code}-${Math.floor(10 + Math.random() * 90)}`
+      : code;
 
     const trip = await db.trip.create({
       data: {
@@ -134,7 +208,11 @@ export async function POST(req: Request) {
       await db.systemLog.create({
         data: {
           action: "TRIP_DISPATCHED",
-          details: JSON.stringify({ tripCode: trip.tripCode, vehicle: vehicle.registrationNumber, driver: driver.name }),
+          details: JSON.stringify({
+            tripCode: trip.tripCode,
+            vehicle: vehicle.registrationNumber,
+            driver: driver.name,
+          }),
           userId: user.id,
         },
       });
@@ -142,7 +220,11 @@ export async function POST(req: Request) {
       await db.systemLog.create({
         data: {
           action: "TRIP_DRAFT_CREATED",
-          details: JSON.stringify({ tripCode: trip.tripCode, source, destination }),
+          details: JSON.stringify({
+            tripCode: trip.tripCode,
+            source,
+            destination,
+          }),
           userId: user.id,
         },
       });
@@ -177,7 +259,10 @@ export async function PATCH(req: Request) {
 
     if (!tripId || !action) {
       return NextResponse.json(
-        { error: "Trip ID and action ('DISPATCH', 'COMPLETE', 'CANCEL') are required." },
+        {
+          error:
+            "Trip ID and action ('DISPATCH', 'COMPLETE', 'CANCEL') are required.",
+        },
         { status: 400 },
       );
     }
@@ -192,9 +277,65 @@ export async function PATCH(req: Request) {
     }
 
     if (action === "DISPATCH") {
+      // Business Rule: Retired or InShop vehicles cannot be dispatched
+      if (
+        trip.vehicle.status === VehicleStatus.Retired ||
+        trip.vehicle.status === VehicleStatus.InShop
+      ) {
+        return NextResponse.json(
+          {
+            error: `Dispatch blocked: Vehicle ${trip.vehicle.registrationNumber} is currently ${trip.vehicle.status === VehicleStatus.InShop ? "In Shop" : "Retired"} and cannot be dispatched.`,
+          },
+          { status: 400 },
+        );
+      }
+
+      // Business Rule: Vehicle already OnTrip cannot be double-dispatched
+      if (trip.vehicle.status === VehicleStatus.OnTrip) {
+        return NextResponse.json(
+          {
+            error: `Dispatch blocked: Vehicle ${trip.vehicle.registrationNumber} is already on an active trip.`,
+          },
+          { status: 400 },
+        );
+      }
+
+      // Business Rule: Suspended drivers cannot be dispatched
+      if (trip.driver.status === DriverStatus.Suspended) {
+        return NextResponse.json(
+          {
+            error: `Dispatch blocked: Driver ${trip.driver.name} is suspended.`,
+          },
+          { status: 400 },
+        );
+      }
+
+      // Business Rule: Expired license drivers cannot be dispatched
+      if (new Date(trip.driver.licenseExpiryDate) < new Date()) {
+        return NextResponse.json(
+          {
+            error: `Dispatch blocked: Driver ${trip.driver.name}'s license has expired.`,
+          },
+          { status: 400 },
+        );
+      }
+
+      // Business Rule: Driver already OnTrip cannot be double-dispatched
+      if (trip.driver.status === DriverStatus.OnTrip) {
+        return NextResponse.json(
+          {
+            error: `Dispatch blocked: Driver ${trip.driver.name} is already on an active trip.`,
+          },
+          { status: 400 },
+        );
+      }
+
+      // Business Rule: Cargo weight must not exceed vehicle capacity
       if (trip.cargoWeight > trip.vehicle.maxLoadCapacity) {
         return NextResponse.json(
-          { error: `Dispatch blocked: Cargo weight exceeds vehicle ${trip.vehicle.registrationNumber} max capacity.` },
+          {
+            error: `Dispatch blocked: Cargo weight exceeds vehicle ${trip.vehicle.registrationNumber} max capacity.`,
+          },
           { status: 400 },
         );
       }
@@ -225,21 +366,28 @@ export async function PATCH(req: Request) {
       await db.systemLog.create({
         data: {
           action: "TRIP_DISPATCHED",
-          details: JSON.stringify({ tripCode: trip.tripCode, vehicle: trip.vehicle.registrationNumber }),
+          details: JSON.stringify({
+            tripCode: trip.tripCode,
+            vehicle: trip.vehicle.registrationNumber,
+          }),
           userId: user.id,
         },
       });
 
       return NextResponse.json({ trip: updated });
     } else if (action === "COMPLETE") {
-      const odoNum = Number(finalOdometer) || trip.vehicle.currentOdometer + trip.plannedDistance;
+      const odoNum =
+        Number(finalOdometer) ||
+        trip.vehicle.currentOdometer + trip.plannedDistance;
 
       const updated = await db.trip.update({
         where: { id: trip.id },
         data: {
           status: TripStatus.Completed,
           completedAt: new Date(),
-          actualDistance: Math.max(0, odoNum - trip.vehicle.currentOdometer) || trip.plannedDistance,
+          actualDistance:
+            Math.max(0, odoNum - trip.vehicle.currentOdometer) ||
+            trip.plannedDistance,
         },
         include: {
           vehicle: true,
@@ -277,7 +425,8 @@ export async function PATCH(req: Request) {
           data: {
             category: "Toll & Route Fees",
             amount: Number(expenseAmount),
-            description: expenseTitle || `Trip Operational Expense - ${trip.tripCode}`,
+            description:
+              expenseTitle || `Trip Operational Expense - ${trip.tripCode}`,
             vehicleId: trip.vehicleId,
           },
         });
@@ -286,7 +435,10 @@ export async function PATCH(req: Request) {
       await db.systemLog.create({
         data: {
           action: "TRIP_COMPLETED",
-          details: JSON.stringify({ tripCode: trip.tripCode, finalOdometer: odoNum }),
+          details: JSON.stringify({
+            tripCode: trip.tripCode,
+            finalOdometer: odoNum,
+          }),
           userId: user.id,
         },
       });
@@ -329,7 +481,10 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ trip: updated });
     }
 
-    return NextResponse.json({ error: "Invalid action parameter." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid action parameter." },
+      { status: 400 },
+    );
   } catch {
     return NextResponse.json(
       { error: "Internal Server Error during trip status update" },
