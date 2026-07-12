@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/immutability */
 "use client";
 // beui.dev/components/motion/popover
 
@@ -333,7 +334,6 @@ export function PopoverTrigger({ children }: PopoverTriggerProps) {
   return cloneElement(child, {
     ...handlers,
     ref: mergeRefs(childRef, (node: HTMLElement | null) => {
-      // eslint-disable-next-line react-hooks/immutability
       ctx.triggerRef.current = node;
     }),
     // Above the goo layer (z-[-1]) so the neck reads behind it.

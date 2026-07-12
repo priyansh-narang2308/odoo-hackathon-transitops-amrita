@@ -163,7 +163,7 @@ export function Select({
 
   return (
     <SelectContext.Provider value={ctx}>
-      <div ref={rootRef} className={cn("relative", className)}>
+      <div ref={rootRef} className={cn("relative", open ? "z-50" : "", className)}>
         {children}
       </div>
     </SelectContext.Provider>
@@ -280,10 +280,9 @@ export function SelectContent({ className, children }: SelectContentProps) {
     const node = innerRef.current;
     if (!trigger || !node) return;
     const rect = trigger.getBoundingClientRect();
-    const h = node.offsetHeight;
     const below = window.innerHeight - rect.bottom;
     const above = rect.top;
-    setPlacement(below < h + 16 && above > below ? "top" : "bottom");
+    setPlacement(below < 240 && above > 240 ? "top" : "bottom");
   }, [open, ctx.triggerId, setPlacement]);
 
   // Specify EVERY corner + both margins each render. The near edge (facing the
@@ -354,8 +353,8 @@ export function SelectContent({ className, children }: SelectContentProps) {
       // flush against the trigger, then separates into its own rounded pill;
       // sits above or below depending on available space
       className={cn(
-        "absolute left-0 right-0 z-20 rounded-xl border border-border bg-background shadow-lg",
-        isTop ? "bottom-full" : "top-full",
+        "absolute left-0 right-0 z-50 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1E1F24] shadow-2xl",
+        isTop ? "bottom-full mb-1.5" : "top-full mt-1.5",
         className,
       )}
     >
@@ -364,7 +363,7 @@ export function SelectContent({ className, children }: SelectContentProps) {
         variants={ctx.reduce ? undefined : LIST_VARIANTS}
         initial={false}
         animate={open ? "show" : "hidden"}
-        className="p-1"
+        className="p-1 max-h-60 overflow-y-auto custom-scrollbar"
       >
         {children}
       </motion.div>
@@ -379,6 +378,17 @@ export interface SelectItemProps {
   children: ReactNode;
 }
 
+function getTextFromNode(node: ReactNode): string {
+  if (node === null || node === undefined || typeof node === "boolean") return "";
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(getTextFromNode).join("");
+  if (typeof node === "object" && "props" in node && node.props) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return getTextFromNode((node as any).props.children);
+  }
+  return "";
+}
+
 export function SelectItem({
   value,
   disabled = false,
@@ -387,13 +397,12 @@ export function SelectItem({
 }: SelectItemProps) {
   const ctx = useSelectContext("SelectItem");
   const selected = ctx.value === value;
-  const label = typeof children === "string" ? children : value;
+  const extracted = getTextFromNode(children).trim();
+  const label = extracted || value;
 
   useLayoutEffect(() => {
     ctx.register(value, label);
-    return () => ctx.unregister(value);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ctx.register, ctx.unregister, value, label]);
+  }, [ctx.register, value, label]);
 
   return (
     <motion.li variants={ctx.reduce ? undefined : ITEM_VARIANTS}>
