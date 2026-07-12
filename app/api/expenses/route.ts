@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { vehicleId, category, amount, description, date } = body;
+    const { vehicleId, category, amount, description, receiptUrl, date } = body;
 
     if (!vehicleId || !category || amount === undefined) {
       return NextResponse.json(
@@ -48,6 +48,7 @@ export async function POST(req: Request) {
         category,
         amount: Number(amount),
         description: description || null,
+        receiptUrl: receiptUrl || null,
         incurredAt: date ? new Date(date) : new Date(),
       },
       include: {
