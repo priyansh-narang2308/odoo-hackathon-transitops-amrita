@@ -333,6 +333,7 @@ export function PopoverTrigger({ children }: PopoverTriggerProps) {
   return cloneElement(child, {
     ...handlers,
     ref: mergeRefs(childRef, (node: HTMLElement | null) => {
+      // eslint-disable-next-line react-hooks/immutability
       ctx.triggerRef.current = node;
     }),
     // Above the goo layer (z-[-1]) so the neck reads behind it.
@@ -419,6 +420,7 @@ export function PopoverContent({ children, className }: PopoverContentProps) {
       ),
     [sizes, side, align, gap, panelRadius],
   );
+  // eslint-disable-next-line react-hooks/refs
   geoRef.current = geo;
 
   // Morph the same clip on the goo body and the content, so the whole popover
