@@ -38,7 +38,7 @@ export async function POST(req: Request) {
     if (!vehicleId || !category || amount === undefined) {
       return NextResponse.json(
         { error: "Vehicle, category, and amount are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 

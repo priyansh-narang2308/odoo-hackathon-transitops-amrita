@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { Caveat } from "next/font/google";
-import { Header } from "@/components/header";
+import { Header } from "@/components/layout/header";
 
 const caveat = Caveat({ subsets: ["latin"] });
 

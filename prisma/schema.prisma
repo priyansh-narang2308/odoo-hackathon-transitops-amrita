@@ -48,6 +48,8 @@ model Vehicle {
   maxLoadCapacity    Float
   currentOdometer    Float
   acquisitionCost    Float
+  insuranceUrl       String?
+  registrationUrl    String?
   status             VehicleStatus @default(Available)
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
@@ -169,6 +171,7 @@ model Expense {
   category    String
   amount      Float
   description String?
+  receiptUrl  String?
   incurredAt  DateTime @default(now())
 
   vehicleId String
