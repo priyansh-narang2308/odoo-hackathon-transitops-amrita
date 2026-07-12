@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { DriversClient } from "@/components/drivers-client";
+import { DriversClient } from "@/components/drivers/drivers-client";
 
 export default async function DriversPage() {
   const user = await getSession();

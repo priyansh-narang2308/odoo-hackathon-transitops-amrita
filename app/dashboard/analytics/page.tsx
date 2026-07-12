@@ -131,10 +131,19 @@ export default async function AnalyticsPage() {
   const maxVehicleCost =
     costliestVehicles.length > 0 ? costliestVehicles[0].cost : 1;
 
+  const expenseBreakdown = {
+    fuel: totalFuelCost,
+    maintenance: totalMaintenanceCost,
+    tolls: dbExpenses.filter(e => e.category.toLowerCase().includes("toll") || e.category.toLowerCase().includes("highway")).reduce((sum, e) => sum + (e.amount || 0), 0),
+    others: dbExpenses.filter(e => !e.category.toLowerCase().includes("toll") && !e.category.toLowerCase().includes("highway")).reduce((sum, e) => sum + (e.amount || 0), 0),
+  };
+
   const initialData = {
     fuelEfficiency,
     fleetUtilization,
     totalOperationalCost,
+    totalMaintenanceCost,
+    expenseBreakdown,
     vehicleRoi,
     monthlyRevenue,
     costliestVehicles,
