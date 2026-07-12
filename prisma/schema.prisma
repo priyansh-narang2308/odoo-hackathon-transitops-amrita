@@ -7,7 +7,9 @@ datasource db {
 }
 
 enum RoleType {
+  ADMIN
   FLEET_MANAGER
+  DISPATCHER
   DRIVER
   SAFETY_OFFICER
   FINANCIAL_ANALYST
@@ -131,10 +133,10 @@ enum MaintenanceStatus {
 
 model MaintenanceLog {
   id          String            @id @default(cuid())
-  title       String // e.g., "Engine Oil Change & Brake Inspection"
+  title       String
   description String?
   cost        Float             @default(0.0)
-  odometerAt  Float // Odometer reading when entered shop
+  odometerAt  Float
   status      MaintenanceStatus @default(Open)
 
   vehicleId String
@@ -151,8 +153,8 @@ model MaintenanceLog {
 model FuelLog {
   id       String   @id @default(cuid())
   liters   Float
-  cost     Float // Total cost of fuel transaction
-  odometer Float // Odometer reading at pump
+  cost     Float
+  odometer Float
   loggedAt DateTime @default(now())
 
   vehicleId String
@@ -164,7 +166,7 @@ model FuelLog {
 
 model Expense {
   id          String   @id @default(cuid())
-  category    String // e.g., "Toll", "Insurance", "Emergency Repair", "Permit"
+  category    String
   amount      Float
   description String?
   incurredAt  DateTime @default(now())
@@ -178,11 +180,19 @@ model Expense {
 
 model SystemLog {
   id        String   @id @default(cuid())
-  action    String // e.g., "TRIP_DISPATCHED", "VEHICLE_MAINTENANCE_OPENED"
-  details   String? // JSON stringified context
+  action    String
+  details   String?
   userId    String?
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   createdAt DateTime @default(now())
 
   @@index([action])
+}
+
+model SystemSettings {
+  id           String   @id @default("global")
+  depotName    String   @default("Gandhinagar Depot GJ4")
+  currency     String   @default("INR (Rs)")
+  distanceUnit String   @default("Kilometers")
+  updatedAt    DateTime @updatedAt
 }

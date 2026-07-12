@@ -24,7 +24,7 @@ async function main() {
 
   const fleetManager = await db.user.create({
     data: {
-      name: "Elena Vance (Fleet Manager)",
+      name: "Priyansh Narang (Fleet Manager)",
       email: "fleet@transitops.com",
       passwordHash: "password123_hashed",
       role: RoleType.FLEET_MANAGER,
@@ -33,7 +33,7 @@ async function main() {
 
   const driverUser = await db.user.create({
     data: {
-      name: "Alex Rivera (Driver Controller)",
+      name: "Paarthu Reddy (Driver Controller)",
       email: "driver@transitops.com",
       passwordHash: "password123_hashed",
       role: RoleType.DRIVER,
@@ -42,7 +42,7 @@ async function main() {
 
   const safetyOfficer = await db.user.create({
     data: {
-      name: "David Chen (Safety Officer)",
+      name: "Shivam Kharat (Safety Officer)",
       email: "safety@transitops.com",
       passwordHash: "password123_hashed",
       role: RoleType.SAFETY_OFFICER,
@@ -51,7 +51,7 @@ async function main() {
 
   const financialAnalyst = await db.user.create({
     data: {
-      name: "Sophia Martinez (Financial Analyst)",
+      name: "Kaushal Loya (Financial Analyst)",
       email: "finance@transitops.com",
       passwordHash: "password123_hashed",
       role: RoleType.FINANCIAL_ANALYST,
