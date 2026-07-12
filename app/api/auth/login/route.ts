@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
+import bcrypt from "bcryptjs";
 
 const LoginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -24,9 +25,15 @@ export async function POST(req: Request) {
       );
     }
 
+    let isMatch = false;
+    
+    // Support legacy plain-text or _hashed passwords for backward compatibility with unmigrated seed data
     const expectedHash = password + "_hashed";
-    const isMatch =
-      user.passwordHash === password || user.passwordHash === expectedHash;
+    if (user.passwordHash === password || user.passwordHash === expectedHash) {
+      isMatch = true;
+    } else {
+      isMatch = await bcrypt.compare(password, user.passwordHash);
+    }
 
     if (!isMatch) {
       return NextResponse.json(
