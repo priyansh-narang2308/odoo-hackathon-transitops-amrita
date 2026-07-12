@@ -53,7 +53,7 @@ export function DriversClient({ initialDrivers, user }: DriversClientProps) {
   const [formExpiry, setFormExpiry] = useState("2028-12-31");
   const [formContact, setFormContact] = useState("+1 (555) 000-0000");
   const [formScore, setFormScore] = useState("98.0");
-  const [formNotes, setFormNotes] = useState("");
+  const [formStatus, setFormStatus] = useState("Available");
 
   const [driverToDelete, setDriverToDelete] = useState<Driver | null>(null);
 
@@ -137,6 +137,7 @@ export function DriversClient({ initialDrivers, user }: DriversClientProps) {
       );
       return;
     }
+    setFormStatus("Available");
     setIsModalOpen(true);
   };
 
@@ -182,6 +183,7 @@ export function DriversClient({ initialDrivers, user }: DriversClientProps) {
       setFormName("");
       setFormLicense("");
       setFormContact("");
+      setFormStatus("Available");
       router.refresh();
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -265,7 +267,9 @@ export function DriversClient({ initialDrivers, user }: DriversClientProps) {
     if (!driverToDelete) return;
     setIsSubmitting(true);
     try {
-      const res = await fetch(`/api/drivers?id=${driverToDelete.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/drivers?id=${driverToDelete.id}`, {
+        method: "DELETE",
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to delete driver");
       toast.success(`Driver ${driverToDelete.name} deleted.`);
@@ -999,7 +1003,12 @@ export function DriversClient({ initialDrivers, user }: DriversClientProps) {
                 Delete Driver?
               </h3>
               <p className="text-sm text-slate-500 dark:text-slate-400 mb-8">
-                Are you sure you want to delete <strong className="text-slate-700 dark:text-slate-300">{driverToDelete.name}</strong>? This action cannot be undone and will remove them from the system.
+                Are you sure you want to delete{" "}
+                <strong className="text-slate-700 dark:text-slate-300">
+                  {driverToDelete.name}
+                </strong>
+                ? This action cannot be undone and will remove them from the
+                system.
               </p>
               <div className="flex w-full gap-3">
                 <button

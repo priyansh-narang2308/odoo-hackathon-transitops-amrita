@@ -65,6 +65,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
       href: "/dashboard",
       badge: null,
       active: true,
+      allowedRoles: ["ADMIN", "FLEET_MANAGER", "DISPATCHER", "DRIVER", "SAFETY_OFFICER", "FINANCIAL_ANALYST"],
     },
     {
       id: "fleet",
@@ -73,6 +74,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
       href: "/dashboard/fleet",
       badge: null,
       active: true,
+      allowedRoles: ["ADMIN", "FLEET_MANAGER", "DISPATCHER", "SAFETY_OFFICER", "FINANCIAL_ANALYST"],
     },
     {
       id: "drivers",
@@ -81,6 +83,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
       href: "/dashboard/drivers",
       badge: null,
       active: true,
+      allowedRoles: ["ADMIN", "FLEET_MANAGER", "DISPATCHER", "SAFETY_OFFICER"],
     },
     {
       id: "trips",
@@ -89,6 +92,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
       href: "/dashboard/trips",
       badge: "Active",
       active: true,
+      allowedRoles: ["ADMIN", "FLEET_MANAGER", "DISPATCHER", "DRIVER", "SAFETY_OFFICER", "FINANCIAL_ANALYST"],
     },
     {
       id: "maintenance",
@@ -97,6 +101,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
       href: "/dashboard/maintenance",
       badge: null,
       active: true,
+      allowedRoles: ["ADMIN", "FLEET_MANAGER", "DISPATCHER", "DRIVER", "SAFETY_OFFICER"],
     },
     {
       id: "expenses",
@@ -105,6 +110,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
       href: "/dashboard/expenses",
       badge: null,
       active: true,
+      allowedRoles: ["ADMIN", "FLEET_MANAGER", "DISPATCHER", "DRIVER", "FINANCIAL_ANALYST"],
     },
     {
       id: "analytics",
@@ -113,6 +119,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
       href: "/dashboard/analytics",
       badge: null,
       active: true,
+      allowedRoles: ["ADMIN", "FLEET_MANAGER", "FINANCIAL_ANALYST"],
     },
     {
       id: "settings",
@@ -121,6 +128,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
       href: "/dashboard/settings",
       badge: null,
       active: true,
+      allowedRoles: ["ADMIN", "FLEET_MANAGER"],
     },
   ];
 
@@ -145,8 +153,13 @@ export function AppSidebar({ user }: AppSidebarProps) {
 
       <SidebarContent className="p-3 space-y-1.5 overflow-y-auto">
         <SidebarMenu className="space-y-2">
-          {menuItems.map((item) => {
-            const isCurrent =
+          {menuItems
+            .filter((item) => {
+              if (!item.allowedRoles) return true;
+              return item.allowedRoles.includes(user?.role || "DRIVER");
+            })
+            .map((item) => {
+              const isCurrent =
               pathname === item.href ||
               (item.href !== "/dashboard" && pathname.startsWith(item.href));
 

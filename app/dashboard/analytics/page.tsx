@@ -10,8 +10,8 @@ export default async function AnalyticsPage() {
     redirect("/login");
   }
 
-  // RBAC: Restrict Analytics to Fleet Managers and Financial Analysts
-  if (user.role !== "FLEET_MANAGER" && user.role !== "FINANCIAL_ANALYST") {
+  // RBAC: Restrict Analytics to Fleet Managers, Financial Analysts, and Admins
+  if (user.role !== "FLEET_MANAGER" && user.role !== "FINANCIAL_ANALYST" && user.role !== "ADMIN") {
     redirect("/dashboard");
   }
 
@@ -134,8 +134,20 @@ export default async function AnalyticsPage() {
   const expenseBreakdown = {
     fuel: totalFuelCost,
     maintenance: totalMaintenanceCost,
-    tolls: dbExpenses.filter(e => e.category.toLowerCase().includes("toll") || e.category.toLowerCase().includes("highway")).reduce((sum, e) => sum + (e.amount || 0), 0),
-    others: dbExpenses.filter(e => !e.category.toLowerCase().includes("toll") && !e.category.toLowerCase().includes("highway")).reduce((sum, e) => sum + (e.amount || 0), 0),
+    tolls: dbExpenses
+      .filter(
+        (e) =>
+          e.category.toLowerCase().includes("toll") ||
+          e.category.toLowerCase().includes("highway"),
+      )
+      .reduce((sum, e) => sum + (e.amount || 0), 0),
+    others: dbExpenses
+      .filter(
+        (e) =>
+          !e.category.toLowerCase().includes("toll") &&
+          !e.category.toLowerCase().includes("highway"),
+      )
+      .reduce((sum, e) => sum + (e.amount || 0), 0),
   };
 
   const initialData = {
