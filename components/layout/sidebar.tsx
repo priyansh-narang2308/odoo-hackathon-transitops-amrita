@@ -23,7 +23,6 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { ModeToggle } from "@/components/layout/mode-toggle";
 import { useRouter } from "next/navigation";
 import {
   AlertDialog,

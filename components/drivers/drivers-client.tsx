@@ -53,9 +53,11 @@ export function DriversClient({ initialDrivers, user }: DriversClientProps) {
   const [formExpiry, setFormExpiry] = useState("2028-12-31");
   const [formContact, setFormContact] = useState("+1 (555) 000-0000");
   const [formScore, setFormScore] = useState("98.0");
-  const [formStatus, setFormStatus] = useState("Available");
+  const [formNotes, setFormNotes] = useState("");
 
-  const isDispatcher = String(user?.role) === "DRIVER";
+  const [driverToDelete, setDriverToDelete] = useState<Driver | null>(null);
+
+  const isDispatcher = user?.role === "DISPATCHER" || user?.role === "DRIVER";
 
   type SortField =
     | "name"
@@ -256,21 +258,24 @@ export function DriversClient({ initialDrivers, user }: DriversClientProps) {
       );
       return;
     }
-    if (
-      !confirm(
-        `Are you sure you want to delete driver ${d.name}? This action cannot be undone.`,
-      )
-    )
-      return;
+    setDriverToDelete(d);
+  };
+
+  const confirmDeleteDriver = async () => {
+    if (!driverToDelete) return;
+    setIsSubmitting(true);
     try {
-      const res = await fetch(`/api/drivers?id=${d.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/drivers?id=${driverToDelete.id}`, { method: "DELETE" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to delete driver");
-      toast.success(`Driver ${d.name} deleted.`);
-      setDrivers((prev) => prev.filter((dr) => dr.id !== d.id));
+      toast.success(`Driver ${driverToDelete.name} deleted.`);
+      setDrivers((prev) => prev.filter((dr) => dr.id !== driverToDelete.id));
       router.refresh();
+      setDriverToDelete(null);
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Error deleting driver");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -974,6 +979,47 @@ export function DriversClient({ initialDrivers, user }: DriversClientProps) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE DRIVER MODAL */}
+      {driverToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm"
+            onClick={() => !isSubmitting && setDriverToDelete(null)}
+          />
+          <div className="relative w-full max-w-md bg-white dark:bg-[#1C1D21] rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 sm:p-8 flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center mb-6">
+                <AlertCircle className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">
+                Delete Driver?
+              </h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-8">
+                Are you sure you want to delete <strong className="text-slate-700 dark:text-slate-300">{driverToDelete.name}</strong>? This action cannot be undone and will remove them from the system.
+              </p>
+              <div className="flex w-full gap-3">
+                <button
+                  type="button"
+                  onClick={() => setDriverToDelete(null)}
+                  disabled={isSubmitting}
+                  className="flex-1 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-sm cursor-pointer transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDeleteDriver}
+                  disabled={isSubmitting}
+                  className="flex-1 h-12 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm cursor-pointer disabled:opacity-50 transition-colors shadow-lg shadow-red-600/25"
+                >
+                  {isSubmitting ? "Deleting..." : "Delete"}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

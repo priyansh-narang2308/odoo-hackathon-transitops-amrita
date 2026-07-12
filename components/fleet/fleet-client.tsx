@@ -53,6 +53,7 @@ export function FleetClient({ initialVehicles, user }: FleetClientProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null);
 
   const [formReg, setFormReg] = useState("");
   const [formName, setFormName] = useState("");
@@ -241,23 +242,26 @@ export function FleetClient({ initialVehicles, user }: FleetClientProps) {
       toast.error("RBAC Restricted: Only Fleet Managers can delete vehicles.");
       return;
     }
-    if (
-      !confirm(
-        `Are you sure you want to delete vehicle ${v.registrationNumber}? This action cannot be undone.`,
-      )
-    )
-      return;
+    setVehicleToDelete(v);
+  };
+
+  const confirmDeleteVehicle = async () => {
+    if (!vehicleToDelete) return;
+    setIsSubmitting(true);
     try {
-      const res = await fetch(`/api/vehicles?id=${v.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/vehicles?id=${vehicleToDelete.id}`, { method: "DELETE" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to delete vehicle");
-      toast.success(`Vehicle ${v.registrationNumber} deleted.`);
-      setVehicles((prev) => prev.filter((veh) => veh.id !== v.id));
+      toast.success(`Vehicle ${vehicleToDelete.registrationNumber} deleted.`);
+      setVehicles((prev) => prev.filter((veh) => veh.id !== vehicleToDelete.id));
       router.refresh();
+      setVehicleToDelete(null);
     } catch (err: unknown) {
       toast.error(
         err instanceof Error ? err.message : "Error deleting vehicle",
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -1087,6 +1091,47 @@ export function FleetClient({ initialVehicles, user }: FleetClientProps) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE VEHICLE MODAL */}
+      {vehicleToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm"
+            onClick={() => !isSubmitting && setVehicleToDelete(null)}
+          />
+          <div className="relative w-full max-w-md bg-white dark:bg-[#1C1D21] rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 sm:p-8 flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center mb-6">
+                <AlertCircle className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">
+                Delete Fleet Asset?
+              </h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-8">
+                Are you sure you want to delete <strong className="text-slate-700 dark:text-slate-300">{vehicleToDelete.registrationNumber} ({vehicleToDelete.name})</strong>? This action cannot be undone and will permanently remove this asset from the registry.
+              </p>
+              <div className="flex w-full gap-3">
+                <button
+                  type="button"
+                  onClick={() => setVehicleToDelete(null)}
+                  disabled={isSubmitting}
+                  className="flex-1 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-sm cursor-pointer transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDeleteVehicle}
+                  disabled={isSubmitting}
+                  className="flex-1 h-12 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm cursor-pointer disabled:opacity-50 transition-colors shadow-lg shadow-red-600/25"
+                >
+                  {isSubmitting ? "Deleting..." : "Delete"}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

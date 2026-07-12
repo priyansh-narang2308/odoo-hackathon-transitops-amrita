@@ -1,0 +1,7 @@
+components/drivers/drivers-client.tsx(168,19): error TS2304: Cannot find name 'formStatus'.
+components/drivers/drivers-client.tsx(215,5): error TS2304: Cannot find name 'setFormStatus'.
+components/drivers/drivers-client.tsx(235,19): error TS2304: Cannot find name 'formStatus'.
+components/drivers/drivers-client.tsx(749,32): error TS2304: Cannot find name 'formStatus'.
+components/drivers/drivers-client.tsx(749,59): error TS2304: Cannot find name 'setFormStatus'.
+components/drivers/drivers-client.tsx(930,32): error TS2304: Cannot find name 'formStatus'.
+components/drivers/drivers-client.tsx(930,59): error TS2304: Cannot find name 'setFormStatus'.
