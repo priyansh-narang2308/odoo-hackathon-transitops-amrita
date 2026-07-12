@@ -100,6 +100,19 @@ export default function LoginPage() {
             </h2>
             <ul className="space-y-3 font-semibold text-sm text-slate-700 dark:text-slate-300">
               <li className="flex items-center gap-3 bg-white/70 dark:bg-[#121316]/80 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+                <span className="w-8 h-8 rounded-lg bg-red-500/15 text-red-600 dark:text-red-400 flex items-center justify-center font-bold">
+                  <ShieldCheck className="w-4 h-4" />
+                </span>
+                <div>
+                  <div className="font-bold text-[#1C1C1C] dark:text-white">
+                    Super Admin
+                  </div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400 font-normal">
+                    Has full system control and RBAC management
+                  </div>
+                </div>
+              </li>
+              <li className="flex items-center gap-3 bg-white/70 dark:bg-[#121316]/80 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
                 <span className="w-8 h-8 rounded-lg bg-[#714B67]/15 text-[#714B67] dark:text-purple-300 flex items-center justify-center font-bold">
                   <Truck className="w-4 h-4" />
                 </span>
@@ -180,10 +193,10 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <div className="lg:col-span-7 p-6 sm:p-12 md:p-16 flex flex-col justify-center max-w-2xl mx-auto w-full">
-        <div className="mb-8">
+      <div className="lg:col-span-7 p-8 lg:p-12 flex flex-col justify-center max-w-lg mx-auto w-full">
+        <div className="mb-6">
           <h2
-            className={`${caveat.className} text-4xl sm:text-5xl font-bold tracking-tight text-[#212529] dark:text-white mb-2 transition-colors`}
+            className={`${caveat.className} text-4xl sm:text-5xl font-bold tracking-tight text-[#212529] dark:text-white mb-1 transition-colors`}
           >
             Sign in to your account
           </h2>
@@ -199,6 +212,14 @@ export default function LoginPage() {
           <div className="flex flex-wrap gap-2.5 text-xs">
             <button
               type="button"
+              onClick={() => quickFill("admin@transitops.com", "ADMIN")}
+              className="px-4 py-2 cursor-pointer rounded-lg bg-red-500/10 border border-red-500/30 text-red-600 font-semibold hover:bg-red-500/20 transition-all duration-200 whitespace-nowrap"
+            >
+              Admin
+            </button>
+
+            <button
+              type="button"
               onClick={() => quickFill("fleet@transitops.com", "FLEET_MANAGER")}
               className="px-4 py-2 cursor-pointer rounded-lg bg-[#714B67]/10 border border-[#714B67]/30 text-[#714B67] font-semibold hover:bg-[#714B67]/20 transition-all duration-200 whitespace-nowrap"
             >
@@ -207,7 +228,9 @@ export default function LoginPage() {
 
             <button
               type="button"
-              onClick={() => quickFill("driver@transitops.com", "DRIVER")}
+              onClick={() =>
+                quickFill("dispatcher@transitops.com", "DISPATCHER")
+              }
               className="px-4 py-2 cursor-pointer rounded-lg bg-[#4CA5FF]/10 border border-[#4CA5FF]/30 text-[#1975D2] font-semibold hover:bg-[#4CA5FF]/20 transition-all duration-200 whitespace-nowrap"
             >
               Dispatcher
@@ -284,16 +307,28 @@ export default function LoginPage() {
               </SelectTrigger>
               <SelectContent className="bg-white dark:bg-[#181A1F] border border-slate-200 dark:border-gray-800 text-[#1C1C1C] dark:text-white cursor-pointer rounded-xl shadow-2xl z-50 p-1">
                 <SelectItem
+                  value="ADMIN"
+                  className="py-2.5 font-medium cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-800 rounded-lg text-red-600 dark:text-red-400"
+                >
+                  Super Admin (God Mode)
+                </SelectItem>
+                <SelectItem
                   value="FLEET_MANAGER"
                   className="py-2.5 font-medium  cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-800 rounded-lg"
                 >
                   Fleet Manager (Assets, Maintenance & ROI)
                 </SelectItem>
                 <SelectItem
-                  value="DRIVER"
+                  value="DISPATCHER"
                   className="py-2.5 font-medium cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-800 rounded-lg"
                 >
                   Dispatcher / Driver Controller (Trips & Routing)
+                </SelectItem>
+                <SelectItem
+                  value="DRIVER"
+                  className="py-2.5 font-medium cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-800 rounded-lg"
+                >
+                  Driver (Assigned Trips & Tasks)
                 </SelectItem>
                 <SelectItem
                   value="SAFETY_OFFICER"

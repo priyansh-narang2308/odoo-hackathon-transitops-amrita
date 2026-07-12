@@ -176,10 +176,10 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      <div className="lg:col-span-7 p-6 sm:p-12 md:p-16 flex flex-col justify-center max-w-2xl mx-auto w-full">
-        <div className="mb-8">
+      <div className="lg:col-span-7 p-8 lg:p-12 flex flex-col justify-center max-w-lg mx-auto w-full">
+        <div className="mb-6">
           <h2
-            className={`${caveat.className} text-4xl sm:text-5xl font-bold tracking-tight text-[#212529] dark:text-white mb-2 flex items-center gap-3 transition-colors`}
+            className={`${caveat.className} text-4xl sm:text-5xl font-bold tracking-tight text-[#212529] dark:text-white mb-1 flex items-center gap-3 transition-colors`}
           >
             Create your account{" "}
             <UserPlus className="w-8 h-8 text-[#714B67] dark:text-purple-300" />
@@ -253,16 +253,28 @@ export default function RegisterPage() {
               </SelectTrigger>
               <SelectContent className="bg-white dark:bg-[#181A1F] border border-slate-200 dark:border-gray-800 text-[#1C1C1C] dark:text-white rounded-xl shadow-2xl z-50 p-1">
                 <SelectItem
+                  value="ADMIN"
+                  className="py-2.5 font-medium cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-800 rounded-lg text-red-600 dark:text-red-400"
+                >
+                  Super Admin (God Mode)
+                </SelectItem>
+                <SelectItem
                   value="FLEET_MANAGER"
                   className="py-2.5 font-medium cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-800 rounded-lg"
                 >
                   Fleet Manager (Assets, Maintenance & ROI)
                 </SelectItem>
                 <SelectItem
-                  value="DRIVER"
+                  value="DISPATCHER"
                   className="py-2.5 font-medium cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-800 rounded-lg"
                 >
                   Dispatcher / Driver Controller (Trips & Routing)
+                </SelectItem>
+                <SelectItem
+                  value="DRIVER"
+                  className="py-2.5 font-medium cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-800 rounded-lg"
+                >
+                  Driver (Assigned Trips & Tasks)
                 </SelectItem>
                 <SelectItem
                   value="SAFETY_OFFICER"
